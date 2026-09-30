@@ -1821,6 +1821,47 @@
       max-width: 900px;
     }
 
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 2.2rem;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 2015;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .lightbox-nav:hover {
+      background: var(--orange);
+      border-color: var(--orange);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .lightbox-prev {
+      left: 1.5rem;
+    }
+
+    .lightbox-next {
+      right: 1.5rem;
+    }
+
+    .lightbox-counter {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
     .lightbox-caption {
       text-align: center;
       margin-top: 1.5rem;
@@ -2228,39 +2269,39 @@
       </div>
 
       <div class="gallery-grid">
-        <!-- Photo 1: Garage -->
-        <div class="gallery-item reveal" style="cursor: pointer;" data-type="image">
+        <!-- Tarjeta 1: Galería de fotos 1 -->
+        <div class="gallery-item reveal" style="cursor: pointer;" data-type="gallery" data-folder="assets/images/gallery/1/" data-images="job_01.jpg,job_02.jpg,job_03.jpg,job_04.jpg,job_05.jpg,job_06.jpg,job_07.jpg,job_08.jpg,job_09.jpg,job_10.jpg,job_11.jpg,job_12.jpg,job_13.jpg">
           <div class="gallery-img-wrapper">
-            <img src="gallery_clean_garage.png" alt="Clean and empty residential garage after junk removal" class="gallery-img">
+            <img src="assets/images/gallery/1/job_01.jpg" alt="Gallery 1 Cover" class="gallery-img" onerror="this.src='gallery_clean_garage.png'">
           </div>
           <div class="gallery-caption">
-            <h4>Cleared Garage Space</h4>
-            <p>Independence, MO</p>
+            <h4>Residential Cleanouts</h4>
+            <p>View Photos</p>
           </div>
         </div>
 
-        <!-- Photo 2: Truck Load -->
-        <div class="gallery-item reveal delay-100" style="cursor: pointer;" data-type="image">
+        <!-- Tarjeta 2: Galería de fotos 2 -->
+        <div class="gallery-item reveal delay-100" style="cursor: pointer;" data-type="gallery" data-folder="assets/images/gallery/2/" data-images="1.jpeg,2.jpeg,3.jpeg,4.jpeg,5.jpeg,6.jpeg,7.jpeg,8.jpeg,9.jpeg">
           <div class="gallery-img-wrapper">
-            <img src="gallery_truck_load.png" alt="Flatbed truck neatly loaded with boxes and old furniture" class="gallery-img">
+            <img src="assets/images/gallery/2/1.jpeg" alt="Gallery 2 Cover" class="gallery-img" onerror="this.src='gallery_truck_load.png'">
           </div>
           <div class="gallery-caption">
-            <h4>Neat Flatbed Load</h4>
-            <p>Kansas City Area</p>
+            <h4>Commercial Dump Loads</h4>
+            <p>View Photos</p>
           </div>
         </div>
 
-        <!-- Video 3: Crew In Action -->
-        <div class="gallery-item reveal delay-200" style="cursor: pointer;" data-type="video" data-video-src="assets/videos/work-video.mp4">
+        <!-- Tarjeta 3: Videos / Live Job -->
+        <div class="gallery-item reveal delay-200" style="cursor: pointer;" data-type="video-gallery" data-folder="assets/images/gallery/3/" data-videos="1.mp4,2.mp4,3.mp4">
           <div class="gallery-img-wrapper">
-            <span class="video-badge">Watch Video</span>
+            <span class="video-badge">Watch Video / Live Job</span>
             <div class="video-play-overlay">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M8 5v14l11-7z"/>
               </svg>
             </div>
-            <!-- Video Poster / Thumbnail element -->
-            <video src="assets/videos/work-video.mp4#t=0.5" class="gallery-img" muted preload="metadata" playsinline></video>
+            <!-- Portada usando el primer video de la lista (u otra imagen de portada si la hay) -->
+            <video src="assets/images/gallery/3/1.mp4#t=0.5" class="gallery-img" muted preload="metadata" playsinline></video>
           </div>
           <div class="gallery-caption">
             <h4>Heavy Removal Crew In Action</h4>
@@ -2519,12 +2560,15 @@
   <!-- Lightbox Modal -->
   <div id="lightboxModal" class="lightbox-modal" aria-hidden="true">
     <button class="lightbox-close" id="lightboxClose" aria-label="Close Gallery View">&times;</button>
+    <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous image" style="display: none;">&#10094;</button>
+    <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next image" style="display: none;">&#10095;</button>
     <div class="lightbox-content-wrapper">
       <img id="lightboxImage" src="" alt="" class="lightbox-image" style="display: none;">
       <video id="lightboxVideo" src="" class="lightbox-video" controls playsinline style="display: none;"></video>
       <div id="lightboxCaption" class="lightbox-caption">
         <h4 id="lightboxTitle"></h4>
         <p id="lightboxLoc"></p>
+        <div id="lightboxCounter" class="lightbox-counter" style="display: none;"></div>
       </div>
     </div>
   </div>
@@ -2827,7 +2871,51 @@
       const lightboxTitle = document.getElementById("lightboxTitle");
       const lightboxLoc = document.getElementById("lightboxLoc");
       const lightboxClose = document.getElementById("lightboxClose");
+      const lightboxPrev = document.getElementById("lightboxPrev");
+      const lightboxNext = document.getElementById("lightboxNext");
+      const lightboxCounter = document.getElementById("lightboxCounter");
       const galleryItems = document.querySelectorAll(".gallery-item");
+
+      let currentMediaItems = [];
+      let currentFolder = "";
+      let currentItemIndex = 0;
+      let currentMediaType = "image"; // 'image' or 'video'
+
+      function updateLightboxMedia() {
+        if (currentMediaItems.length > 0) {
+          const mediaFile = currentMediaItems[currentItemIndex].trim();
+          lightboxCounter.innerText = `${currentItemIndex + 1} / ${currentMediaItems.length}`;
+          
+          if (currentMediaType === "video") {
+            lightboxImg.style.display = "none";
+            lightboxImg.src = "";
+            lightboxVid.style.display = "block";
+            lightboxVid.src = currentFolder + mediaFile;
+            lightboxVid.load();
+            lightboxVid.play().catch(e => console.log("Autoplay caught:", e));
+          } else {
+            lightboxVid.style.display = "none";
+            lightboxVid.pause();
+            lightboxVid.src = "";
+            lightboxImg.style.display = "block";
+            lightboxImg.src = currentFolder + mediaFile;
+          }
+        }
+      }
+
+      function nextMedia() {
+        if (currentMediaItems.length > 0) {
+          currentItemIndex = (currentItemIndex + 1) % currentMediaItems.length;
+          updateLightboxMedia();
+        }
+      }
+
+      function prevMedia() {
+        if (currentMediaItems.length > 0) {
+          currentItemIndex = (currentItemIndex - 1 + currentMediaItems.length) % currentMediaItems.length;
+          updateLightboxMedia();
+        }
+      }
 
       galleryItems.forEach(item => {
         item.addEventListener("click", () => {
@@ -2838,7 +2926,14 @@
           lightboxTitle.innerText = titleText;
           lightboxLoc.innerText = locText;
 
+          // Reset navigation
+          lightboxPrev.style.display = "none";
+          lightboxNext.style.display = "none";
+          lightboxCounter.style.display = "none";
+          currentMediaItems = [];
+
           if (type === "video") {
+            // Legacy single video support
             const videoSrc = item.getAttribute("data-video-src");
             lightboxImg.style.display = "none";
             lightboxImg.src = "";
@@ -2846,14 +2941,43 @@
             lightboxVid.src = videoSrc;
             lightboxVid.load();
             lightboxVid.play().catch(e => console.log("Autoplay caught:", e));
-          } else {
-            const img = item.querySelector(".gallery-img");
-            lightboxVid.style.display = "none";
-            lightboxVid.pause();
-            lightboxVid.src = "";
-            lightboxImg.style.display = "block";
-            lightboxImg.src = img.src;
-            lightboxImg.alt = img.alt || "Gallery Image";
+          } else if (type === "gallery" || type === "video-gallery" || type === "image") {
+            currentFolder = item.getAttribute("data-folder") || "";
+            currentMediaType = type === "video-gallery" ? "video" : "image";
+            
+            const mediaStr = type === "video-gallery" 
+                             ? item.getAttribute("data-videos") || "" 
+                             : item.getAttribute("data-images") || "";
+                             
+            if ((type === "gallery" || type === "video-gallery") && mediaStr) {
+              currentMediaItems = mediaStr.split(",").filter(s => s.trim().length > 0);
+              currentItemIndex = 0;
+              
+              if (currentMediaItems.length > 1) {
+                lightboxPrev.style.display = "flex";
+                lightboxNext.style.display = "flex";
+                lightboxCounter.style.display = "block";
+              }
+              
+              if (currentMediaType === "image") {
+                lightboxVid.style.display = "none";
+                lightboxVid.pause();
+                lightboxVid.src = "";
+              } else {
+                lightboxImg.style.display = "none";
+                lightboxImg.src = "";
+              }
+              updateLightboxMedia();
+            } else {
+              // Fallback for simple images
+              const img = item.querySelector(".gallery-img");
+              lightboxVid.style.display = "none";
+              lightboxVid.pause();
+              lightboxVid.src = "";
+              lightboxImg.style.display = "block";
+              lightboxImg.src = img.src;
+              lightboxImg.alt = img.alt || "Gallery Image";
+            }
           }
 
           lightboxModal.classList.add("is-active");
@@ -2871,19 +2995,29 @@
           lightboxVid.currentTime = 0;
           lightboxVid.src = "";
         }
+        currentMediaItems = [];
       };
 
       lightboxClose.addEventListener("click", closeLightbox);
+      lightboxPrev.addEventListener("click", (e) => { e.stopPropagation(); prevMedia(); });
+      lightboxNext.addEventListener("click", (e) => { e.stopPropagation(); nextMedia(); });
+      
       lightboxModal.addEventListener("click", (e) => {
-        if (e.target === lightboxModal) {
+        if (e.target === lightboxModal || e.target.classList.contains("lightbox-content-wrapper")) {
           closeLightbox();
         }
       });
 
-      // ESC key close
+      // Keyboard navigation
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && lightboxModal.classList.contains("is-active")) {
+        if (!lightboxModal.classList.contains("is-active")) return;
+        
+        if (e.key === "Escape") {
           closeLightbox();
+        } else if (e.key === "ArrowRight") {
+          nextMedia();
+        } else if (e.key === "ArrowLeft") {
+          prevMedia();
         }
       });
 
