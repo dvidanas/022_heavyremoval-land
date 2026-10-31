@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Heavy Removal — Got Junk? We've Got A Truck.</title>
+  <title>Heavy Removal — Junk or Treat</title>
   <meta name="description" content="Point at it. We'll take it. Friendly neighborhood crew with a big truck, honest pricing, and zero drama. Same-day junk pickups available.">
   
   <!-- Fonts -->
@@ -568,6 +568,19 @@
       display: flex;
       gap: 1.2rem;
       flex-wrap: wrap;
+    }
+
+    @media (min-width: 1025px) {
+      .hero-actions {
+        flex-wrap: nowrap;
+        gap: 0.8rem;
+        width: max-content;
+      }
+
+      .hero-actions .btn {
+        padding: 1rem 1.5rem;
+        white-space: nowrap;
+      }
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1964,13 +1977,15 @@
     <div class="container">
       <div class="hero-content reveal">
         <span class="eyebrow">Same-Day Junk Pickups Available</span>
-        <h1>Got Junk?<br>We've Got<br>A Truck.</h1>
+        <h1>Junk or<br>Treat</h1>
         <p class="hero-subline">
-          No contracts, no drama. We show up, load it up, and leave you with your space back. Straightforward, honest, and ready to roll.
+          Why are you scare...<br>
+          Our prices aren't scary at aaaall.
         </p>
         <div class="hero-actions">
           <a href="#book" class="btn btn-orange">Book Your Pickup</a>
           <a href="tel:+18168010181" class="btn btn-outline-orange">Call +1 816-801-0181</a>
+          <a href="https://wa.me/19134015795" target="_blank" rel="noopener" class="btn btn-outline-orange">ONLY TEXT: +1 913-401-5795</a>
         </div>
       </div>
     </div>
